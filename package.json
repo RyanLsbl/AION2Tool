@@ -1,0 +1,34 @@
+{
+  "name": "aion2tool",
+  "version": "1.0.0",
+  "description": "Daily-/Weekly-Checkliste für AION2 – nur für die Legion Altersheim (Ishtar)",
+  "private": true,
+  "type": "module",
+  "main": "dist/server/index.js",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc -p tsconfig.json && vite build",
+    "start": "node --no-warnings=ExperimentalWarning dist/server/index.js",
+    "dev": "npm run build && node --no-warnings=ExperimentalWarning dist/server/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.web.json --noEmit",
+    "test": "tsc -p tsconfig.json && node --no-warnings=ExperimentalWarning --test \"dist/tests/*.test.js\"",
+    "demo": "npm run build && node --no-warnings=ExperimentalWarning dist/demo/demo.js"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.1.5",
+    "@fastify/static": "^10.1.8",
+    "@fontsource/cinzel": "^5.3.0",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "fastify": "^5.12.7",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "typescript": "^5.9.0",
+    "vite": "^8.3.5"
+  }
+}
