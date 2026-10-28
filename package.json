@@ -1,6 +1,6 @@
 {
   "name": "aion2tool",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Daily-/Weekly-Checkliste für AION2 – nur für die Legion Altersheim (Ishtar)",
   "private": true,
   "type": "module",

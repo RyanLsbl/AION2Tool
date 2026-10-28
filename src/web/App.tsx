@@ -9,6 +9,8 @@ import { Header } from './components/Header';
 import { Login } from './components/Login';
 import { Onboarding } from './components/Onboarding';
 import { Settings } from './components/Settings';
+import { BOARD_TOUR, Tour } from './components/Tour';
+import { SetupWizard } from './components/Wizard';
 import { Spinner } from './ui';
 
 export type Route = 'board' | 'setup' | 'chars' | 'settings' | 'admin';
@@ -24,12 +26,18 @@ export interface Session {
   info: AppInfo;
   setMe: (me: Me) => void;
   reload: () => Promise<void>;
+  /** Einrichtungs-Assistent bzw. Rundgang (erneut) starten */
+  startWizard: () => void;
+  startTour: () => void;
 }
 
 export function App() {
   const [state, setState] = useState<{ me: Me | null; info: AppInfo } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [{ route, sub }, setRoute] = useState(readRoute);
+  // null = automatisch (Assistent, solange er noch nicht erledigt ist)
+  const [wizard, setWizard] = useState<boolean | null>(null);
+  const [tour, setTour] = useState(false);
 
   const reload = useCallback(async () => {
     try {
@@ -69,11 +77,20 @@ export function App() {
   }
   if (!state.me) return <Login info={state.info} />;
 
+  const showTour = () => {
+    if (route !== 'board') location.hash = '#/board';
+    setTour(true);
+  };
   const session: Session = {
     me: state.me,
     info: state.info,
     setMe: (me) => setState((s) => (s ? { ...s, me } : s)),
     reload,
+    startWizard: () => {
+      setTour(false);
+      setWizard(true);
+    },
+    startTour: showTour,
   };
   const logout = async () => {
     await post('/api/logout').catch(() => undefined);
@@ -90,9 +107,26 @@ export function App() {
     );
   }
 
+  // Beim ersten Login (nach der Freischaltung) führt der Assistent durch die Einrichtung
+  if (wizard ?? !state.me.tutorialDone) {
+    return (
+      <>
+        <Header session={session} route={null} onLogout={logout} />
+        <SetupWizard
+          session={session}
+          onFinish={(startTour) => {
+            setWizard(false);
+            if (startTour) showTour();
+          }}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <Header session={session} route={route} onLogout={logout} />
+      {tour && <Tour steps={BOARD_TOUR} onClose={() => setTour(false)} />}
       <main className="page">
         {route === 'board' && <Board session={session} />}
         {route === 'setup' && <Builder session={session} />}

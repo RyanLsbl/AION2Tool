@@ -135,7 +135,7 @@ export function Board({ session }: { session: Session }) {
                   Inhalt
                 </th>
                 {columns.map((col) => (
-                  <th key={col.kind === 'account' ? 'acc' : col.char.id} className="col-head" scope="col">
+                  <th key={col.kind === 'account' ? 'acc' : col.char.id} className="col-head" scope="col" data-tour={col.kind === 'account' ? undefined : 'col-head'}>
                     {col.kind === 'account' ? <AccountHead /> : <CharHead c={col.char} />}
                   </th>
                 ))}
@@ -239,7 +239,7 @@ function AboSwitch({ me, session }: { me: Me; session: Session }) {
     }
   };
   return (
-    <label className={`switch-label ${me.abo ? 'on' : ''}`} title="Spezielle Quai-Mitgliedschaft: höhere Maxima (z. B. Odyl 840, Shugo-Schlüssel 21) und doppeltes Öffnen des Kubus">
+    <label data-tour="abo" className={`switch-label ${me.abo ? 'on' : ''}`} title="Spezielle Quai-Mitgliedschaft: höhere Maxima (z. B. Odyl 840, Shugo-Schlüssel 21) und doppeltes Öffnen des Kubus">
       <input type="checkbox" checked={me.abo} onChange={toggle} disabled={busy} />
       <span className="switch" aria-hidden />
       <span>
@@ -253,7 +253,7 @@ function ResetBar({ ctx }: { ctx: Ctx }) {
   const daily = nextReset(ctx.now, 'daily', ctx.reset);
   const weekly = nextReset(ctx.now, 'weekly', ctx.reset);
   return (
-    <div className="reset-bar">
+    <div className="reset-bar" data-tour="reset">
       <div className="reset-chip">
         <span className="reset-label">Daily-Reset</span>
         <strong>{formatDuration(daily - ctx.now)}</strong>
@@ -343,7 +343,7 @@ function Banners({ warnings, ctx }: { warnings: { key: string; task: TaskDef; wh
   };
   const shown = expanded ? visible : visible.slice(0, 4);
   return (
-    <section className="banners" aria-label="Hinweise">
+    <section className="banners" aria-label="Hinweise" data-tour="banners">
       {shown.map(({ key, task, who, w }) => (
         <div key={key} className={`banner banner-${w.level}`} role={w.level === 'danger' ? 'alert' : undefined}>
           <span className="banner-icon" aria-hidden>
@@ -401,7 +401,7 @@ function Row({ item, task, columns, states, tasksById, ctx, me, onChange, onEdit
             </small>
           </div>
           {task.note && (
-            <span className="info-dot" title={task.note} tabIndex={0} role="note" aria-label={task.note}>
+            <span className="info-dot" title={task.note} tabIndex={0} role="note" aria-label={task.note} data-tour="info">
               i
             </span>
           )}
@@ -489,7 +489,7 @@ function ActionCell({
   const toast = useToast();
   const actions = (task.params.actions ?? []).filter((a) => !a.aboOnly || abo);
   return (
-    <div className="cell-actions">
+    <div className="cell-actions" data-tour="actions">
       {actions.map((a) => {
         const blocker = actionBlocker(a, charId, states, tasksById, ctx);
         return (
@@ -529,7 +529,7 @@ function Cell({ task, c, ctx, title, onDelta, onEdit }: { task: TaskDef; c: Comp
 
   if (c.value == null) {
     return (
-      <button className="btn btn-small btn-outline set-btn" onClick={onEdit} title={`${title}: aktuellen Stand aus dem Spiel eintragen`}>
+      <button className="btn btn-small btn-outline set-btn" onClick={onEdit} title={`${title}: aktuellen Stand aus dem Spiel eintragen`} data-tour="set-stand">
         Stand eintragen
       </button>
     );
@@ -550,7 +550,7 @@ function Cell({ task, c, ctx, title, onDelta, onEdit }: { task: TaskDef; c: Comp
   const empty = available(c) <= 0;
 
   return (
-    <div className={`counter ${done ? 'counter-done' : ''}`}>
+    <div className={`counter ${done ? 'counter-done' : ''}`} data-tour="counter">
       <div className="counter-top">
         <button className="step-btn" onClick={() => onDelta(-step)} disabled={empty} aria-label={`${title}: ${fmtNum(step)} benutzt`} title={`−${fmtNum(step)} benutzt`}>
           −

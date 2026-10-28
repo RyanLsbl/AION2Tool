@@ -6,14 +6,16 @@ Jeder baut sich seine eigene Checkliste zusammen. Das Tool rechnet Odyl-Energie,
 
 ![Checkliste](docs/checkliste.png)
 
-| Handy | Hell | Mein Setup |
+| Einrichtungs-Assistent | Handy | Hell |
 |---|---|---|
-| ![Handy](docs/handy.png) | ![Hell](docs/checkliste-hell.png) | ![Setup](docs/setup.png) |
+| ![Assistent](docs/assistent.png) | ![Handy](docs/handy.png) | ![Hell](docs/checkliste-hell.png) |
 
 ## Funktionen
 
 | Bereich | Was es kann |
 |---|---|
+| 🪄 **Einrichtungs-Assistent** | Beim ersten Login führt ein Assistent durch alles: Abo ja/nein, Twinks hinzufügen und dann **Eintrag für Eintrag die aktuellen Stände aus dem Spiel** (pro Charakter, natürlich + Extra, Schnellwahl „0“/„voll“, Leeres bleibt für später). Danach Warnungen einstellen. |
+| 🧭 **Rundgang** | Hebt nacheinander die Bereiche der Checkliste hervor und erklärt sie (Resets, Warnungen, Zähler, Knöpfe, Setup …). Assistent und Rundgang lassen sich jederzeit über das **„?“** oben rechts erneut starten. |
 | ✅ **Checkliste** | Raster wie bei BynnArk: Zeilen = Inhalte, Spalten = Account (server-weit) + Charaktere mit Klasse, Stufe, Gegenstandsstufe und Kampfkraft. Countdown bis Daily- und Weekly-Reset. Auf dem Handy ein Charakter pro Ansicht. |
 | 🔢 **Zähler** | Regeneration (Odyl +15 alle 3 Std.), stapelnde Tickets (Albtraum +2/Tag bis 14), Kontingente (Tägliches Dungeon 14/Woche), Haken und Knöpfe. „−“ = benutzt, „+“ = erhalten, Klick auf die Zahl = echten Ingame-Stand eintragen. Jede Änderung lässt sich rückgängig machen. |
 | 🎁 **Extra-Vorrat** | Tickets/Energie aus Items (z. B. Albtraum-Herausforderungstickets) landen in einem eigenen Vorrat – wie im Spiel: zählt nicht gegen das Maximum, verfällt nicht und wird erst nach dem natürlichen Vorrat verbraucht. |
@@ -136,7 +138,9 @@ Am einfachsten (Dienst wird gestoppt, Datenbank gesichert, aktualisiert, neu ges
 .\scripts\update.ps1
 ```
 
-Von Hand: Tool beenden → Ordner `data` sichern → `git pull` → `npm install` → `npm run build` → starten. `.env` und `data` bleiben unverändert.
+Von Hand: Tool beenden → Ordner `data` sichern → `git pull` → `npm install` → `npm run build` → starten. `.env` und `data` bleiben unverändert; neue Spalten ergänzt das Tool beim Start selbst.
+
+- **Von Version 1.0:** Alle Daten bleiben erhalten. Jedes Mitglied sieht beim nächsten Besuch einmal den neuen Einrichtungs-Assistenten (kann ihn aber überspringen).
 
 ## Datensicherung
 
@@ -155,7 +159,7 @@ npm test            # alle Tests (Zähler, Resets, Steam-Login, Legions-Prüfung
 npm run typecheck   # TypeScript prüfen (Server + Oberfläche)
 ```
 
-Im Demo-Modus meldet man sich ohne Steam an: `http://localhost:3000/auth/dev` (Haupt-Admin „Lyra“), `…/auth/dev?steamid=76561190000000002` (Mitglied „Borin“) oder `…/auth/dev?steamid=76561190000000099&name=Neu` (neuer User).
+Im Demo-Modus meldet man sich ohne Steam an: `http://localhost:3000/auth/dev` (Haupt-Admin „Lyra“), `…/auth/dev?steamid=76561190000000002` (Mitglied „Borin“) oder `…/auth/dev?steamid=76561190000000099&name=Neu` (neuer User – Main „Aeryn“ und Twink „Pip“ eintragen, dann startet der Einrichtungs-Assistent).
 
 Für Änderungen an der Oberfläche mit Live-Neuladen: Server starten (`npm run demo`) und parallel `npx vite` – die Vite-Seite leitet `/api` und `/auth` an Port 3000 weiter.
 

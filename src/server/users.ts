@@ -118,6 +118,7 @@ export function toMe(u: UserRow): Me {
     abo: !!u.abo,
     prefs: prefsOf(u),
     access: accessOf(u),
+    tutorialDone: !!u.tutorial_done_at,
     legionSeen: u.legion_seen,
     legionCheckedAt: u.legion_checked_at,
     characters: charactersOf(u.id).map(toCharacter),

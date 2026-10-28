@@ -157,6 +157,19 @@ export function Settings({ session, onLogout }: { session: Session; onLogout: ()
         </section>
 
         <section className="card">
+          <h2>Hilfe & Einrichtung</h2>
+          <p className="muted small">Der Assistent fragt deine aktuellen Stände Schritt für Schritt ab, der Rundgang erklärt die Checkliste.</p>
+          <div className="row gap wrap">
+            <button className="btn" onClick={session.startWizard}>
+              🪄 Einrichtungs-Assistent
+            </button>
+            <button className="btn" onClick={session.startTour}>
+              🧭 Rundgang starten
+            </button>
+          </div>
+        </section>
+
+        <section className="card">
           <h2>Reset-Zeiten</h2>
           <p>
             Daily-Reset täglich um <strong>{info.reset.time}</strong> ({info.reset.tz}) – bei dir <strong>{formatWhen(daily, now).replace(/^(heute|morgen) /, '')}</strong> Uhr.

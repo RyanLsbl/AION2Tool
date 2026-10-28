@@ -12,6 +12,7 @@ const NAV: { route: Route; label: string; icon: string; officer?: boolean }[] = 
 export function Header({ session, route, onLogout }: { session: Session; route: Route | null; onLogout: () => void }) {
   const { me, info } = session;
   const [menu, setMenu] = useState(false);
+  const [help, setHelp] = useState(false);
   return (
     <header className="topbar">
       <a className="brand" href="#/">
@@ -24,13 +25,40 @@ export function Header({ session, route, onLogout }: { session: Session; route: 
       {route && (
         <nav className="nav">
           {NAV.filter((n) => !n.officer || me.isOfficer).map((n) => (
-            <a key={n.route} href={`#/${n.route}`} className={route === n.route ? 'active' : ''}>
+            <a key={n.route} href={`#/${n.route}`} className={route === n.route ? 'active' : ''} data-tour={`nav-${n.route}`} title={n.label}>
               <span aria-hidden>{n.icon}</span> <span className="nav-label">{n.label}</span>
             </a>
           ))}
         </nav>
       )}
       <div className="topbar-right">
+        {route && (
+          <div className="user-menu">
+            <button className="icon-btn help-btn" onClick={() => setHelp((h) => !h)} aria-expanded={help} aria-label="Hilfe" title="Hilfe" data-tour="help">
+              ?
+            </button>
+            {help && (
+              <div className="dropdown" onMouseLeave={() => setHelp(false)}>
+                <button
+                  onClick={() => {
+                    setHelp(false);
+                    session.startTour();
+                  }}
+                >
+                  🧭 Rundgang durch die Checkliste
+                </button>
+                <button
+                  onClick={() => {
+                    setHelp(false);
+                    session.startWizard();
+                  }}
+                >
+                  🪄 Einrichtungs-Assistent (Stände eintragen)
+                </button>
+              </div>
+            )}
+          </div>
+        )}
         <button className="icon-btn theme-btn" onClick={toggleTheme} title="Hell/Dunkel umschalten" aria-label="Hell/Dunkel umschalten">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
             <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="2" />

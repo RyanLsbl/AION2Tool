@@ -245,6 +245,48 @@ describe('Charaktere & Ansprüche', () => {
   });
 });
 
+describe('Einrichtungs-Assistent', () => {
+  it('merkt sich, ob das Tutorial erledigt ist', async () => {
+    const c = await member('76561198000000002', 'Lyra');
+    let me = await api<{ me: { tutorialDone: boolean } }>(c, 'GET', '/api/me');
+    assert.equal(me.me.tutorialDone, false);
+    me = await api(c, 'PUT', '/api/me/settings', { tutorialDone: true });
+    assert.equal(me.me.tutorialDone, true);
+    me = await api(c, 'PUT', '/api/me/settings', { tutorialDone: false });
+    assert.equal(me.me.tutorialDone, false);
+  });
+
+  it('speichert mehrere Stände auf einmal – alles oder nichts', async () => {
+    const c = await member('76561198000000002', 'Lyra');
+    const charId = get<{ id: number }>("SELECT id FROM characters WHERE name = 'Lyra'")!.id;
+    const board = await api<Board>(c, 'GET', '/api/board');
+    const id = (name: string) => board.tasks.find((t) => t.name === name)!.id;
+    const r = await api<{ changes: { after: TaskState }[] }>(c, 'POST', '/api/state/bulk', {
+      entries: [
+        { taskId: id('Odyl-Energie'), charId, value: 420, bonus: 80 },
+        { taskId: id('Albtraum'), charId, value: 9 },
+        { taskId: id('Shugo-Festival-Schlüssel'), charId: 0, value: 6 },
+      ],
+    });
+    assert.equal(r.changes.length, 3);
+    const after = await api<Board>(c, 'GET', '/api/board');
+    const st = (taskId: number, ch: number) => after.states.find((x) => x.taskId === taskId && x.charId === ch);
+    assert.deepEqual([st(id('Odyl-Energie'), charId)!.value, st(id('Odyl-Energie'), charId)!.bonus], [420, 80]);
+    assert.equal(st(id('Shugo-Festival-Schlüssel'), 0)!.value, 6);
+
+    // Ein ungültiger Eintrag → gar nichts wird gespeichert
+    await api(c, 'POST', '/api/state/bulk', {
+      entries: [
+        { taskId: id('Albtraum'), charId, value: 3 },
+        { taskId: id('Shugo-Festival-Schlüssel'), charId, value: 2 },
+      ],
+    }, 400);
+    const unchanged = await api<Board>(c, 'GET', '/api/board');
+    assert.equal(unchanged.states.find((x) => x.taskId === id('Albtraum'))!.value, 9);
+    await api(c, 'POST', '/api/state/bulk', { entries: 'quatsch' }, 400);
+  });
+});
+
 describe('Board, Knöpfe und Builder', () => {
   it('Expedition mit/ohne Belohnung verändert Odyl bzw. das Wochen-Kontingent', async () => {
     const c = await member('76561198000000002', 'Lyra');

@@ -147,6 +147,8 @@ export interface Me {
   abo: boolean;
   prefs: Prefs;
   access: Access;
+  /** Einrichtungs-Assistent abgeschlossen oder übersprungen */
+  tutorialDone: boolean;
   /** was PlayNC zuletzt als Legion des Mains gemeldet hat */
   legionSeen: string | null;
   legionCheckedAt: number | null;

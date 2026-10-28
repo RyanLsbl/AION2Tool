@@ -2,6 +2,7 @@
 // Kein Steam und kein PlayNC nötig – zum Ausprobieren und Entwickeln (npm run demo).
 // Anmeldung: http://localhost:3000/auth/dev  (Haupt-Admin „Lyra“)
 //            http://localhost:3000/auth/dev?steamid=76561190000000002  (Mitglied „Borin“)
+//            http://localhost:3000/auth/dev?steamid=76561190000000099&name=Neuling  (neuer User → Main „Aeryn“ eintragen)
 
 import './env.js';
 import { buildApp } from '../server/app.js';
@@ -31,6 +32,9 @@ const chars: FakeChar[] = [
   { name: 'Theron', className: 'Chanter', level: 49, cp: 39010, il: 1990, legion: LEGION },
   { name: 'Mira', className: 'Ranger', level: 50, cp: 47100, il: 2120, legion: 'Sternenwacht' },
   { name: 'Faelan', className: 'Spiritmaster', level: 50, cp: 44480, il: 2060, legion: LEGION },
+  // Noch frei – zum Ausprobieren des Einrichtungs-Assistenten mit einem neuen User
+  { name: 'Aeryn', className: 'Cleric', level: 50, cp: 42950, il: 2030, legion: LEGION },
+  { name: 'Pip', className: 'Ranger', level: 40, cp: 12880, il: 1240, legion: null },
 ];
 const byId = (id: string | null) => chars.find((c) => `demo-${c.name}` === id);
 
@@ -64,6 +68,8 @@ async function member(steamId: string, name: string, main: string, twinks: strin
   await addCharacter(user(steamId), main, true);
   for (const t of twinks) await addCharacter(user(steamId), t, false);
   if (abo) run('UPDATE users SET abo = 1 WHERE steam_id = ?', steamId);
+  // Demo-Mitglieder sind schon eingerichtet; neue User sehen den Einrichtungs-Assistenten
+  run('UPDATE users SET tutorial_done_at = ? WHERE steam_id = ?', Date.now(), steamId);
   const u = user(steamId);
   boardFor(u);
   return u;
@@ -112,4 +118,4 @@ await app.listen({ port: config.port, host: '127.0.0.1' });
 console.log(`\nDemo läuft: ${config.publicUrl}`);
 console.log(`  Haupt-Admin:  ${config.publicUrl}/auth/dev`);
 console.log(`  Mitglied:     ${config.publicUrl}/auth/dev?steamid=76561190000000002`);
-console.log(`  Neuer User:   ${config.publicUrl}/auth/dev?steamid=76561190000000099&name=Neuling\n`);
+console.log(`  Neuer User:   ${config.publicUrl}/auth/dev?steamid=76561190000000099&name=Neuling  (Main „Aeryn“, Twink „Pip“)\n`);

@@ -140,8 +140,9 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
 
   app.put('/api/me/settings', async (req) => {
     const u = requireUser(req);
-    const b = (req.body ?? {}) as { abo?: unknown; prefs?: Partial<Prefs> };
+    const b = (req.body ?? {}) as { abo?: unknown; prefs?: Partial<Prefs>; tutorialDone?: unknown };
     if (typeof b.abo === 'boolean') run('UPDATE users SET abo = ? WHERE id = ?', b.abo, u.id);
+    if (typeof b.tutorialDone === 'boolean') run('UPDATE users SET tutorial_done_at = ? WHERE id = ?', b.tutorialDone ? Date.now() : null, u.id);
     if (b.prefs && typeof b.prefs === 'object') {
       const cur = prefsOf(u);
       const next: Prefs = { ...DEFAULT_PREFS, ...cur };
@@ -214,6 +215,21 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
         : { delta: Number(b.delta) };
     const change = changeState(u, int(b.taskId), int(b.charId), op);
     return { changes: [change] };
+  });
+
+  // Mehrere Stände auf einmal eintragen (Einrichtungs-Assistent) – alles oder nichts
+  app.post('/api/state/bulk', async (req) => {
+    const u = requireAccess(req);
+    const entries = (req.body as { entries?: unknown })?.entries;
+    if (!Array.isArray(entries) || entries.length > 200) throw new UserError('Ungültige Liste.');
+    const changes = tx(() =>
+      entries.map((raw) => {
+        const e = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+        const bonus = e.bonus === undefined || e.bonus === null ? undefined : Number(e.bonus);
+        return changeState(u, int(e.taskId), int(e.charId), { value: Number(e.value), bonus });
+      }),
+    );
+    return { changes };
   });
 
   app.post('/api/action', async (req) => {

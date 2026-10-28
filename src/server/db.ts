@@ -6,7 +6,7 @@ import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 
 let db: DatabaseSync | null = null;
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS users (
   legion_confirmed_at INTEGER,
   main_set_at INTEGER,
   board_seeded INTEGER NOT NULL DEFAULT 0,
+  tutorial_done_at INTEGER,       -- Einrichtungs-Assistent abgeschlossen/übersprungen
   created_at INTEGER NOT NULL,
   last_login INTEGER
 );
@@ -141,9 +142,22 @@ export function openDb(path: string): DatabaseSync {
   db = new DatabaseSync(path);
   db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
   db.exec(SCHEMA);
-  const v = get<{ value: string }>("SELECT value FROM meta WHERE key = 'schema'");
-  if (!v) run("INSERT INTO meta (key, value) VALUES ('schema', ?)", String(SCHEMA_VERSION));
+  migrate();
   return db;
+}
+
+/** Spalten, die nach Version 1.0 dazugekommen sind – werden in bestehenden Datenbanken ergänzt (nie gelöscht). */
+const ADDED_COLUMNS: { table: string; column: string; definition: string }[] = [{ table: 'users', column: 'tutorial_done_at', definition: 'INTEGER' }];
+
+function migrate(): void {
+  for (const c of ADDED_COLUMNS) {
+    const columns = all<{ name: string }>(`PRAGMA table_info(${c.table})`);
+    if (!columns.some((x) => x.name === c.column)) conn().exec(`ALTER TABLE ${c.table} ADD COLUMN ${c.column} ${c.definition}`);
+  }
+  run(
+    "INSERT INTO meta (key, value) VALUES ('schema', ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
+    String(SCHEMA_VERSION),
+  );
 }
 
 export function closeDb(): void {
@@ -213,6 +227,7 @@ export interface UserRow {
   legion_confirmed_at: number | null;
   main_set_at: number | null;
   board_seeded: number;
+  tutorial_done_at: number | null;
   created_at: number;
   last_login: number | null;
 }
